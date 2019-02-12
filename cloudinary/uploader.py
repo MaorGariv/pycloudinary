@@ -39,7 +39,7 @@ UPLOAD_LARGE_CHUNK_SIZE = 20000000
 
 def upload(file, **options):
     params = utils.build_upload_params(**options)
-    return call_cacheable_api("upload", params, file=file, **options)
+    return _call_cacheable_api("upload", params, file=file, **options)
 
 
 def unsigned_upload(file, upload_preset, **options):
@@ -104,7 +104,7 @@ def upload_large_part(file, **options):
     if 'resource_type' not in options:
         options['resource_type'] = "raw"
     
-    return call_cacheable_api("upload", params, file=file, **options)
+    return _call_cacheable_api("upload", params, file=file, **options)
 
 
 def destroy(public_id, **options):
@@ -114,7 +114,7 @@ def destroy(public_id, **options):
         "invalidate": options.get("invalidate"),
         "public_id": public_id
     }
-    return call_api("destroy", params, **options)
+    return _call_api("destroy", params, **options)
 
 
 def rename(from_public_id, to_public_id, **options):
@@ -127,20 +127,20 @@ def rename(from_public_id, to_public_id, **options):
         "to_public_id": to_public_id,
         "to_type": options.get("to_type")
     }
-    return call_api("rename", params, **options)
+    return _call_api("rename", params, **options)
 
 
 def explicit(public_id, **options):
     params = utils.build_upload_params(**options)
     params["public_id"] = public_id
-    return call_cacheable_api("explicit", params, **options)
+    return _call_cacheable_api("explicit", params, **options)
 
 
 def create_archive(**options):
     params = utils.archive_params(**options)
     if options.get("target_format") is not None:
         params["target_format"] = options.get("target_format")
-    return call_api("generate_archive", params, **options)
+    return _call_api("generate_archive", params, **options)
 
 
 def create_zip(**options):
@@ -156,7 +156,7 @@ def generate_sprite(tag, **options):
         "transformation": utils.generate_transformation_string(
             fetch_format=options.get("format"), **options)[0]
     }
-    return call_api("sprite", params, **options)
+    return _call_api("sprite", params, **options)
 
 
 def multi(tag, **options):
@@ -168,7 +168,7 @@ def multi(tag, **options):
         "notification_url": options.get("notification_url"),
         "transformation": utils.generate_transformation_string(**options)[0]
     }
-    return call_api("multi", params, **options)
+    return _call_api("multi", params, **options)
 
 
 def explode(public_id, **options):
@@ -179,22 +179,22 @@ def explode(public_id, **options):
         "notification_url": options.get("notification_url"),
         "transformation": utils.generate_transformation_string(**options)[0]
     }
-    return call_api("explode", params, **options)
+    return _call_api("explode", params, **options)
 
 
 # options may include 'exclusive' (boolean) which causes clearing this tag from all other resources
 def add_tag(tag, public_ids=None, **options):
     exclusive = options.pop("exclusive", None)
     command = "set_exclusive" if exclusive else "add"
-    return call_tags_api(tag, command, public_ids, **options)
+    return _call_tags_api(tag, command, public_ids, **options)
 
 
 def remove_tag(tag, public_ids=None, **options):
-    return call_tags_api(tag, "remove", public_ids, **options)
+    return _call_tags_api(tag, "remove", public_ids, **options)
 
 
 def replace_tag(tag, public_ids=None, **options):
-    return call_tags_api(tag, "replace", public_ids, **options)
+    return _call_tags_api(tag, "replace", public_ids, **options)
 
 
 def remove_all_tags(public_ids, **options):
@@ -206,7 +206,7 @@ def remove_all_tags(public_ids, **options):
 
     :return: dictionary with a list of public IDs that were updated
     """
-    return call_tags_api(None, "remove_all", public_ids, **options)
+    return _call_tags_api(None, "remove_all", public_ids, **options)
 
 
 def add_context(context, public_ids, **options):
@@ -219,7 +219,7 @@ def add_context(context, public_ids, **options):
 
     :return: dictionary with a list of public IDs that were updated
     """
-    return call_context_api(context, "add", public_ids, **options)
+    return _call_context_api(context, "add", public_ids, **options)
 
 
 def remove_all_context(public_ids, **options):
@@ -231,10 +231,10 @@ def remove_all_context(public_ids, **options):
 
     :return: dictionary with a list of public IDs that were updated
     """
-    return call_context_api(None, "remove_all", public_ids, **options)
+    return _call_context_api(None, "remove_all", public_ids, **options)
 
 
-def call_tags_api(tag, command, public_ids=None, **options):
+def _call_tags_api(tag, command, public_ids=None, **options):
     params = {
         "timestamp": utils.now(),
         "tag": tag,
@@ -242,10 +242,10 @@ def call_tags_api(tag, command, public_ids=None, **options):
         "command": command,
         "type": options.get("type")
     }
-    return call_api("tags", params, **options)
+    return _call_api("tags", params, **options)
 
 
-def call_context_api(context, command, public_ids=None, **options):
+def _call_context_api(context, command, public_ids=None, **options):
     params = {
         "timestamp": utils.now(),
         "context": utils.encode_context(context),
@@ -253,7 +253,7 @@ def call_context_api(context, command, public_ids=None, **options):
         "command": command,
         "type": options.get("type")
     }
-    return call_api("context", params, **options)
+    return _call_api("context", params, **options)
 
 
 TEXT_PARAMS = [
@@ -274,7 +274,7 @@ def text(text, **options):
     params = {"timestamp": utils.now(), "text": text}
     for key in TEXT_PARAMS:
         params[key] = options.get(key)
-    return call_api("text", params, **options)
+    return _call_api("text", params, **options)
 
 
 def _save_responsive_breakpoints_to_cache(result):
@@ -299,13 +299,13 @@ def _save_responsive_breakpoints_to_cache(result):
         responsive_breakpoints_cache_instance.set(result["public_id"], breakpoints, **options)
 
 
-def call_cacheable_api(action, params, http_headers=None, return_error=False, unsigned=False, file=None, timeout=None,
+def _call_cacheable_api(action, params, http_headers=None, return_error=False, unsigned=False, file=None, timeout=None,
                        **options):
     """
     Calls Upload API and saves results to cache (if enabled)
     """
 
-    result = call_api(action, params, http_headers, return_error, unsigned, file, timeout, **options)
+    result = _call_api(action, params, http_headers, return_error, unsigned, file, timeout, **options)
 
     if "use_cache" in options or cloudinary.config().use_cache:
         _save_responsive_breakpoints_to_cache(result)
@@ -313,7 +313,7 @@ def call_cacheable_api(action, params, http_headers=None, return_error=False, un
     return result
 
 
-def call_api(action, params, http_headers=None, return_error=False, unsigned=False, file=None, timeout=None, **options):
+def _call_api(action, params, http_headers=None, return_error=False, unsigned=False, file=None, timeout=None, **options):
     if http_headers is None:
         http_headers = {}
     file_io = None
