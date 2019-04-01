@@ -572,7 +572,7 @@ class ApiTest(unittest.TestCase):
             api.subfolders(PREFIX)
 
     def test_folder_deletion(self):
-        """ upload a resource with folder to create the folder and delete the resource"""
+        """upload a resource with folder to create the folder and delete the resource"""
         folder = format(PREFIX)
         uploader.upload(TEST_IMAGE, folder=folder)
         api.delete_resources_by_prefix(folder)
@@ -581,7 +581,7 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(len(result["folders"]), 0)
         self.assertEqual(result["total_count"], 0)
 
-        """" should delete an empty folder"""
+        """"should delete an empty folder"""
         delete_result = api.delete_folder(folder)
 
         self.assertEqual(next(iter(delete_result)), 'deleted')
