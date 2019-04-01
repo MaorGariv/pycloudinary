@@ -222,6 +222,11 @@ def delete_derived_by_transformation(public_ids, transformations,
     return call_api("delete", uri, params, **options)
 
 
+def delete_folder(folder, **options):
+    uri = ["folders", folder]
+    return call_api("delete", uri, {} , **options)
+
+
 def tags(**options):
     resource_type = options.pop("resource_type", "image")
     uri = ["tags", resource_type]

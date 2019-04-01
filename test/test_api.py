@@ -571,6 +571,22 @@ class ApiTest(unittest.TestCase):
         with six.assertRaisesRegex(self, api.NotFound):
             api.subfolders(PREFIX)
 
+    def test_folder_deletion(self):
+        """ upload a resource with folder to create the folder and delete the resource"""
+        folder = format(PREFIX)
+        uploader.upload(TEST_IMAGE, folder=folder)
+        api.delete_resources_by_prefix(folder)
+        result = api.subfolders(folder)
+
+        self.assertEqual(len(result["folders"]), 0)
+        self.assertEqual(result["total_count"], 0)
+
+        """" should delete an empty folder"""
+        delete_result = api.delete_folder(folder)
+
+        self.assertEqual(next(iter(delete_result)), 'deleted')
+        self.assertEqual(delete_result.get('deleted')[0], folder)
+
     def test_CloudinaryImage_len(self):
         """Tests the __len__ function on CloudinaryImage"""
         metadata = {
