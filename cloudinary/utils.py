@@ -872,6 +872,7 @@ def build_upload_params(**options):
         "face_coordinates": encode_double_array(options.get("face_coordinates")),
         "custom_coordinates": encode_double_array(options.get("custom_coordinates")),
         "context": encode_context(options.get("context")),
+        "metadata": encode_context(options.get("metadata")),
         "moderation": options.get("moderation"),
         "raw_convert": options.get("raw_convert"),
         "quality_override": options.get("quality_override"),
